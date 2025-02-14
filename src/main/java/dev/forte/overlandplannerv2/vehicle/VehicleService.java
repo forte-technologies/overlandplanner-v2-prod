@@ -29,23 +29,63 @@ public class VehicleService {
 
     // Get all vehicles for a specific user
     public List<VehicleEntity> getVehiclesByUser(Long userId) {
-        try {
-            System.out.println("🔍 Fetching vehicles for user ID: " + userId);
 
-            List<VehicleEntity> vehicles = vehicleRepository.findByUserId(userId);
+        System.out.println("🔍 Fetching vehicles for user ID: " + userId);
 
-            if (vehicles.isEmpty()) {
+        List<VehicleEntity> vehicles = vehicleRepository.findByUserId(userId);
+
+        if (vehicles.isEmpty()) {
                 System.out.println("⚠ No vehicles found for user ID: " + userId);
-            } else {
-                System.out.println("✅ Found " + vehicles.size() + " vehicles for user ID: " + userId);
-            }
-
-            return vehicles;
-        } catch (Exception e) {
-            System.err.println("❌ Error in VehicleService: " + e.getMessage());
-            e.printStackTrace();
-            throw e; // ✅ Ensure error is logged and propagated
+        } else {
+            System.out.println("✅ Found " + vehicles.size() + " vehicles for user ID: " + userId);
         }
+        return vehicles;
+
+    }
+
+    public VehicleDTO getVehicleByUser(Long userId, Long vehicleId) {
+
+        System.out.println("🔍 Fetching vehicle for user ID: " + userId + " and vehicle ID: " + vehicleId);
+
+        VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
+
+        if (vehicle == null) {
+            System.out.println("⚠ No vehicles found for user ID: " + userId + " and vehicle ID: " + vehicleId);
+            throw new RuntimeException("Vehicle not found or access denied.");
+        }
+
+        System.out.println("Found vehicle: " + vehicle.toString());
+        return new VehicleDTO(vehicle);
+
+    }
+
+    public VehicleDTO updateVehicleByUser(Long userId, Long vehicleId, UpdateVehicleDTO updateVehicleDTO) {
+
+        // 🔍 Fetch the vehicle using the userId and vehicleId.
+        VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
+        if (vehicle == null) {
+            throw new RuntimeException("Vehicle not found or access denied.");
+        }
+
+        // 🛠 Update only fields provided in the UpdateVehicleDTO, ignoring nulls.
+        if (updateVehicleDTO.getMake() != null) {
+            vehicle.setMake(updateVehicleDTO.getMake());
+        }
+        if (updateVehicleDTO.getModel() != null) {
+            vehicle.setModel(updateVehicleDTO.getModel());
+        }
+        if (updateVehicleDTO.getYear() != null) {
+            vehicle.setYear(updateVehicleDTO.getYear());
+        }
+        if (updateVehicleDTO.getModifications() != null) {
+            vehicle.setModifications(updateVehicleDTO.getModifications());
+        }
+
+        // 🔄 Save the updated vehicle.
+        vehicleRepository.save(vehicle);
+
+        System.out.println("✅ Updated vehicle for user ID: " + userId + " and vehicle ID: " + vehicleId);
+        return new VehicleDTO(vehicle);  // Map the updated entity to a DTO and return.
     }
 
 }

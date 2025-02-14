@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.forte.overlandplannerv2.jwtconfig.AuthUtils.getAuthenticatedUserId;
+
 @PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/user/vehicles")
@@ -24,40 +26,56 @@ public class VehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VehicleEntity>> getUserVehicles(Authentication authentication) {
-        try {
-            System.out.println("🔍 Vehicle request received");
+    public ResponseEntity<List<VehicleDTO>> getUserVehicles(Authentication authentication) {
 
-            if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
-                throw new RuntimeException("❌ Authentication failed - User is not logged in");
-            }
+        System.out.println("🔍 Vehicle request received");
+        Long userId = getAuthenticatedUserId(authentication);
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Long userId = userDetails.getId();
-            System.out.println("✅ Authenticated User ID: " + userId);
+        System.out.println("✅ Authenticated User ID: " + userId);
 
-            List<VehicleEntity> vehicles = vehicleService.getVehiclesByUser(userId);
+        List<VehicleEntity> vehicles = vehicleService.getVehiclesByUser(userId);
+        List<VehicleDTO> vehicleDTOS = vehicles.stream().map(VehicleDTO::new).toList();
 
-            return ResponseEntity.ok(vehicles);
-        } catch (Exception e) {
-            System.err.println("❌ Error fetching vehicles: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.emptyList());
-        }
+        vehicles.forEach(vehicle -> System.out.println("🚗 Vehicle fetched: " + vehicle));
+
+        return ResponseEntity.ok(vehicleDTOS);
+    }
+
+     @GetMapping("/{vehicleId}")
+    public ResponseEntity<VehicleDTO> getUserVehicle(Authentication authentication,
+                                                              @PathVariable Long vehicleId) {
+        System.out.println("🔍 Vehicle request received");
+        Long userId = getAuthenticatedUserId(authentication);
+
+        System.out.println("✅ Authenticated User ID: " + userId);
+        VehicleDTO vehicleDTO = vehicleService.getVehicleByUser(userId,vehicleId);
+
+        return ResponseEntity.ok(vehicleDTO);
     }
 
 
     @PostMapping
-    public ResponseEntity<List<VehicleEntity>> createVehicle(
-            @RequestBody CreateVehicleDTO vehicleDTO,
-            Authentication authentication
-    ) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long userId = userDetails.getId();
+    public ResponseEntity<List<VehicleDTO>> createVehicle( @RequestBody CreateVehicleDTO vehicleDTO,
+            Authentication authentication) {
+
+        Long userId = getAuthenticatedUserId(authentication);
 
         vehicleService.addVehicle(vehicleDTO, userId);
         List<VehicleEntity> userVehicles = vehicleService.getVehiclesByUser(userId);
-        return ResponseEntity.ok(userVehicles);
+        List<VehicleDTO> vehicleDTOS = userVehicles.stream().map(VehicleDTO::new).toList();
+        return ResponseEntity.ok(vehicleDTOS);
+    }
+
+    @PutMapping("/{vehicleID}")
+    public ResponseEntity<VehicleDTO> updateVehicleMods(Authentication authentication,@PathVariable Long vehicleID,
+                                                    @RequestBody UpdateVehicleDTO updateVehicleDTO){
+
+        Long userId = getAuthenticatedUserId(authentication);
+
+        System.out.println("🔍 Update data received: " + updateVehicleDTO);
+
+        VehicleDTO updatedVehicle = vehicleService.updateVehicleByUser(userId, vehicleID, updateVehicleDTO);
+        return ResponseEntity.ok(updatedVehicle);
+
     }
 }

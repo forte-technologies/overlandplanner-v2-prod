@@ -50,11 +50,11 @@ public class VehicleDTO {
         this.year = year;
     }
 
-    public String getCustomizations() {
+    public String getModifications() {
         return modifications;
     }
 
-    public void setCustomizations(String modifications) {
+    public void setModifications(String modifications) {
         this.modifications = modifications;
     }
 }

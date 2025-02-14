@@ -71,4 +71,17 @@ public class VehicleEntity {
     public void setModifications(String modifications) {
         this.modifications = modifications;
     }
+
+    @Override
+    public String toString() {
+        return "VehicleEntity{" +
+                "id=" + id +
+                ", make='" + make + '\'' +
+                ", model='" + model + '\'' +
+                ", year=" + year +
+                ", modifications='" + modifications + '\'' +
+                ", userId=" + userId +
+                '}';
+    }
+
 }

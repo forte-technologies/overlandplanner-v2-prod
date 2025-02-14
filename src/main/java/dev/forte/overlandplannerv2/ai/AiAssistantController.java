@@ -25,22 +25,17 @@ public class AiAssistantController {
 
     @GetMapping("/trip-assistant")
     public ResponseEntity<?> generation(@RequestParam String userInput) {
-        try {
-            String response = this.chatClient.prompt()
-                    .user("You are a trip assistant that helps people with their " +
-                            "overlanding related questions about public land, national forests, parks, and " +
-                            "offroading, here is the user's input, answer in 350 characters or less: " + userInput)
-                    .call()
-                    .content();
-            // Wrap the response in a JSON object
-            Map<String, String> jsonResponse = new HashMap<>();
-            jsonResponse.put("message", response);
-            return ResponseEntity.ok(jsonResponse);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error processing request: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
+        String response = this.chatClient.prompt()
+                .user("You are a trip assistant that helps people with their " +
+                        "overlanding related questions about public land, national forests, parks, and " +
+                        "offroading, here is the user's input, answer in 350 characters or less: " + userInput)
+                .call()
+                .content();
+        // Wrap the response in a JSON object
+        Map<String, String> jsonResponse = new HashMap<>();
+        jsonResponse.put("message", response);
+        return ResponseEntity.ok(jsonResponse);
+
     }
 
 }
