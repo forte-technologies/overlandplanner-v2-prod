@@ -23,7 +23,7 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @GetMapping("/view")
+    @GetMapping
     public ResponseEntity<List<VehicleEntity>> getUserVehicles(Authentication authentication) {
         try {
             System.out.println("🔍 Vehicle request received");
@@ -48,7 +48,7 @@ public class VehicleController {
     }
 
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<List<VehicleEntity>> createVehicle(
             @RequestBody CreateVehicleDTO vehicleDTO,
             Authentication authentication
