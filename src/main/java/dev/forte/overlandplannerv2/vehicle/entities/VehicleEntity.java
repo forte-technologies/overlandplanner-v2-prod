@@ -1,5 +1,4 @@
-package dev.forte.overlandplannerv2.vehicle;
-import dev.forte.overlandplannerv2.user.UserEntity;
+package dev.forte.overlandplannerv2.vehicle.entities;
 import jakarta.persistence.*;
 
 @Entity

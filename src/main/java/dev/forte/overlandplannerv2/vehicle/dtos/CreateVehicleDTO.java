@@ -1,4 +1,4 @@
-package dev.forte.overlandplannerv2.vehicle;
+package dev.forte.overlandplannerv2.vehicle.dtos;
 
 public class CreateVehicleDTO {
     private String make;

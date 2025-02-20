@@ -99,7 +99,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody LogoutRequest logoutRequest) {
-        System.out.println("Logging out user with refresh token: " + logoutRequest.getRefreshToken());
+
 
         String username = refreshTokenService.getUsernameFromToken(logoutRequest.getRefreshToken());
 

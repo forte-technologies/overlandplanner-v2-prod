@@ -1,4 +1,6 @@
-package dev.forte.overlandplannerv2.vehicle;
+package dev.forte.overlandplannerv2.vehicle.dtos;
+
+import dev.forte.overlandplannerv2.vehicle.entities.VehicleEntity;
 
 public class VehicleDTO {
     private Long id;

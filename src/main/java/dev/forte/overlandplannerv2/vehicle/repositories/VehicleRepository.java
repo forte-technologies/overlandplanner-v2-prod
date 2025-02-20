@@ -1,5 +1,6 @@
-package dev.forte.overlandplannerv2.vehicle;
+package dev.forte.overlandplannerv2.vehicle.repositories;
 
+import dev.forte.overlandplannerv2.vehicle.entities.VehicleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

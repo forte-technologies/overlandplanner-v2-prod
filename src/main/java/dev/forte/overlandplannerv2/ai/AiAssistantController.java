@@ -28,7 +28,7 @@ public class AiAssistantController {
         String response = this.chatClient.prompt()
                 .user("You are a trip assistant that helps people with their " +
                         "overlanding related questions about public land, national forests, parks, and " +
-                        "offroading, here is the user's input, answer in 350 characters or less: " + userInput)
+                        "offroading, here is the user's input, answer in 600 characters or less: " + userInput)
                 .call()
                 .content();
         // Wrap the response in a JSON object

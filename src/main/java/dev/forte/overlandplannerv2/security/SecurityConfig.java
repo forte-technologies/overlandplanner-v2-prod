@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 csp.policyDirectives("default-src 'self'; frame-ancestors 'none';"))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/mvum_roads.geojson", "/mvum_trails.geojson").permitAll()
                         .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/user/**").authenticated()

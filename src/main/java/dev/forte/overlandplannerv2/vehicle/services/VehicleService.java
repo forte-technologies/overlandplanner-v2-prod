@@ -1,9 +1,17 @@
-package dev.forte.overlandplannerv2.vehicle;
+package dev.forte.overlandplannerv2.vehicle.services;
 
+import dev.forte.overlandplannerv2.error.VehicleNotFoundException;
+import dev.forte.overlandplannerv2.vehicle.dtos.CreateVehicleDTO;
+import dev.forte.overlandplannerv2.vehicle.dtos.UpdateVehicleDTO;
+import dev.forte.overlandplannerv2.vehicle.dtos.VehicleDTO;
+import dev.forte.overlandplannerv2.vehicle.entities.VehicleEntity;
+import dev.forte.overlandplannerv2.vehicle.repositories.VehicleRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class VehicleService {
 
@@ -13,61 +21,48 @@ public class VehicleService {
         this.vehicleRepository = vehicleRepository;
     }
 
-    // Save a new vehicle for the user
     public void addVehicle(CreateVehicleDTO vehicleDTO, Long userId) {
-        // Map DTO to Entity
+
         VehicleEntity vehicleEntity = new VehicleEntity();
         vehicleEntity.setMake(vehicleDTO.getMake());
         vehicleEntity.setModel(vehicleDTO.getModel());
         vehicleEntity.setYear(vehicleDTO.getYear());
         vehicleEntity.setModifications(vehicleDTO.getModifications());
-        vehicleEntity.setUserId(userId); // 🔥 Store userId directly instead of the full UserEntity
+        vehicleEntity.setUserId(userId);
 
-        // Save to the database
         vehicleRepository.save(vehicleEntity);
+        log.debug("Vehicle created successfully.");
     }
 
-    // Get all vehicles for a specific user
-    public List<VehicleEntity> getVehiclesByUser(Long userId) {
-
-        System.out.println("🔍 Fetching vehicles for user ID: " + userId);
-
+    public List<VehicleDTO> getVehiclesByUser(Long userId) {
+        log.debug("Fetching vehicles from repository for user {}", userId);
         List<VehicleEntity> vehicles = vehicleRepository.findByUserId(userId);
 
         if (vehicles.isEmpty()) {
-                System.out.println("⚠ No vehicles found for user ID: " + userId);
-        } else {
-            System.out.println("✅ Found " + vehicles.size() + " vehicles for user ID: " + userId);
+            log.info("No vehicles found for user {}", userId);
         }
-        return vehicles;
-
+        log.debug("Retrieved {} vehicles for user {}", vehicles.size(), userId);
+        return vehicles.stream().map(VehicleDTO::new).toList();
     }
 
     public VehicleDTO getVehicleByUser(Long userId, Long vehicleId) {
-
-        System.out.println("🔍 Fetching vehicle for user ID: " + userId + " and vehicle ID: " + vehicleId);
-
+        log.debug("Fetching vehicle for user ID: {} and vehicle ID: {}", userId, vehicleId);
         VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
 
         if (vehicle == null) {
-            System.out.println("⚠ No vehicles found for user ID: " + userId + " and vehicle ID: " + vehicleId);
-            throw new RuntimeException("Vehicle not found or access denied.");
+            log.error("No vehicle found for user ID: {} and vehicle ID: {}", userId, vehicleId);
+            throw new VehicleNotFoundException("Vehicle not found or access denied.");
         }
-
-        System.out.println("Found vehicle: " + vehicle.toString());
+        log.debug("Found vehicle: {}", vehicle);
         return new VehicleDTO(vehicle);
-
     }
 
     public VehicleDTO updateVehicleByUser(Long userId, Long vehicleId, UpdateVehicleDTO updateVehicleDTO) {
-
-        // 🔍 Fetch the vehicle using the userId and vehicleId.
         VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
         if (vehicle == null) {
-            throw new RuntimeException("Vehicle not found or access denied.");
+            throw new VehicleNotFoundException("Vehicle not found or access denied.");
         }
 
-        // 🛠 Update only fields provided in the UpdateVehicleDTO, ignoring nulls.
         if (updateVehicleDTO.getMake() != null) {
             vehicle.setMake(updateVehicleDTO.getMake());
         }
@@ -80,12 +75,20 @@ public class VehicleService {
         if (updateVehicleDTO.getModifications() != null) {
             vehicle.setModifications(updateVehicleDTO.getModifications());
         }
-
-        // 🔄 Save the updated vehicle.
         vehicleRepository.save(vehicle);
-
-        System.out.println("✅ Updated vehicle for user ID: " + userId + " and vehicle ID: " + vehicleId);
-        return new VehicleDTO(vehicle);  // Map the updated entity to a DTO and return.
+        log.debug("Vehicle updated successfully with ID {}", vehicleId);
+        return new VehicleDTO(vehicle);
     }
+
+    public void deleteVehicleByUser(Long userId, Long vehicleId) {
+        VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
+        if (vehicle == null) {
+            throw new VehicleNotFoundException("Vehicle not found or access denied.");
+        }
+        vehicleRepository.delete(vehicle);
+        log.debug("Vehicle deleted successfully.");
+    }
+
+
 
 }
