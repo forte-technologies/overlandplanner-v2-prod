@@ -4,6 +4,8 @@ package dev.forte.overlandplannerv2.waypoint;
 import dev.forte.overlandplannerv2.trip.TripEntity;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "waypoints")
 public class WaypointEntity {
@@ -31,6 +33,13 @@ public class WaypointEntity {
 
     @Column(nullable = false)
     private Double longitude;
+
+    @Column(name = "start_date", nullable = true)
+    private LocalDate startDate;
+
+    @Column(name = "end_date", nullable = true)
+    private LocalDate endDate;
+
 
     // Getters and setters
 
@@ -90,4 +99,19 @@ public class WaypointEntity {
         this.longitude = longitude;
     }
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 }

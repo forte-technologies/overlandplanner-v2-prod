@@ -2,6 +2,8 @@ package dev.forte.overlandplannerv2.waypoint.dtos;
 
 import dev.forte.overlandplannerv2.waypoint.WaypointEntity;
 
+import java.time.LocalDate;
+
 public class WaypointDTO {
 
     private Long id;
@@ -10,7 +12,8 @@ public class WaypointDTO {
     private String description;
     private Double latitude;
     private Double longitude;
-
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public WaypointDTO(WaypointEntity entity) {
         this.id = entity.getId();
@@ -68,4 +71,18 @@ public class WaypointDTO {
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+
 }

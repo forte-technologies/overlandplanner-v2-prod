@@ -6,7 +6,7 @@ import dev.forte.overlandplannerv2.vehicle.dtos.UpdateVehicleDTO;
 import dev.forte.overlandplannerv2.vehicle.dtos.VehicleDTO;
 import dev.forte.overlandplannerv2.vehicle.services.VehicleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,7 @@ public class VehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VehicleDTO>> getUserVehicles(Authentication authentication) {
+    public List<VehicleDTO> getUserVehicles(Authentication authentication) {
 
         Long userId = getAuthenticatedUserId(authentication);
         log.debug("Fetching vehicles for user ID: {}", userId);
@@ -36,22 +36,22 @@ public class VehicleController {
         List<VehicleDTO> vehicleDTOs = vehicleService.getVehiclesByUser(userId);
         log.debug("Retrieved {} vehicles", vehicleDTOs.size());
 
-        return ResponseEntity.ok(vehicleDTOs);
+        return vehicleDTOs;
     }
 
     @GetMapping("/{vehicleId}")
-    public ResponseEntity<VehicleDTO> getUserVehicle(Authentication authentication,
+    public VehicleDTO getUserVehicle(Authentication authentication,
                                                      @PathVariable Long vehicleId) {
 
         Long userId = getAuthenticatedUserId(authentication);
         log.debug("Fetching vehicle ID: {} for user ID: {}", vehicleId, userId);
 
-        VehicleDTO vehicleDTO = vehicleService.getVehicleByUser(userId, vehicleId);
-        return ResponseEntity.ok(vehicleDTO);
+        return vehicleService.getVehicleByUser(userId, vehicleId);
+
     }
 
     @PostMapping
-    public ResponseEntity<List<VehicleDTO>> createVehicle(@RequestBody CreateVehicleDTO vehicleDTO,
+    public List<VehicleDTO> createVehicle(@RequestBody CreateVehicleDTO vehicleDTO,
                                                           Authentication authentication) {
 
         Long userId = getAuthenticatedUserId(authentication);
@@ -61,11 +61,11 @@ public class VehicleController {
         List<VehicleDTO> vehicleDTOS = vehicleService.getVehiclesByUser(userId);
         log.debug("Vehicle created successfully for user ID: {}", userId);
 
-        return ResponseEntity.ok(vehicleDTOS);
+        return vehicleDTOS;
     }
 
     @PutMapping("/{vehicleID}")
-    public ResponseEntity<VehicleDTO> updateVehicleMods(Authentication authentication, @PathVariable Long vehicleID,
+    public VehicleDTO updateVehicleMods(Authentication authentication, @PathVariable Long vehicleID,
                                                         @RequestBody UpdateVehicleDTO updateVehicleDTO) {
 
         Long userId = getAuthenticatedUserId(authentication);
@@ -74,16 +74,16 @@ public class VehicleController {
         VehicleDTO updatedVehicle = vehicleService.updateVehicleByUser(userId, vehicleID, updateVehicleDTO);
         log.debug("Vehicle ID: {} updated successfully", vehicleID);
 
-        return ResponseEntity.ok(updatedVehicle);
+        return updatedVehicle;
     }
 
     @DeleteMapping("/{vehicleId}")
-    public ResponseEntity<Void> deleteUserVehicle(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserVehicle(
             @PathVariable Long vehicleId, Authentication authentication) {
 
         Long userId = getAuthenticatedUserId(authentication);
         vehicleService.deleteVehicleByUser(userId, vehicleId);
         log.debug("Deleted vehicle with vehicle ID: {}", vehicleId);
-        return ResponseEntity.noContent().build();
     }
 }

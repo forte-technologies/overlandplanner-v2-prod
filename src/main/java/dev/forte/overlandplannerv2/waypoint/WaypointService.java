@@ -34,6 +34,9 @@ public class WaypointService {
         waypointEntity.setDescription(createWaypointDTO.getDescription());
         waypointEntity.setLatitude(Double.valueOf(createWaypointDTO.getLatitude()));
         waypointEntity.setLongitude(Double.valueOf(createWaypointDTO.getLongitude()));
+        waypointEntity.setStartDate(createWaypointDTO.getStartDate()); // Map the start date
+        waypointEntity.setEndDate(createWaypointDTO.getEndDate());
+
 
         waypointRepository.save(waypointEntity);
     }
@@ -90,6 +93,14 @@ public class WaypointService {
         if (updateWaypointDTO.getLongitude() != null){
             waypointEntity.setLongitude(updateWaypointDTO.getLongitude());
         }
+        if (updateWaypointDTO.getStartDate() != null) { // Update start date if provided
+            waypointEntity.setStartDate(updateWaypointDTO.getStartDate());
+        }
+        if (updateWaypointDTO.getEndDate() != null) { // Update end date if provided
+            waypointEntity.setEndDate(updateWaypointDTO.getEndDate());
+        }
+
+
         waypointRepository.save(waypointEntity);
         return new WaypointDTO(waypointEntity);
     }

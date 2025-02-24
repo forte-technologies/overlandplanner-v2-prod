@@ -49,7 +49,6 @@ public class WaypointController {
         return ResponseEntity.ok(waypoint);
     }
 
-
     @PutMapping("/{waypointId}")
     public ResponseEntity<WaypointDTO> updateWaypoint(Authentication authentication,
                                                       @PathVariable Long tripId,

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -23,6 +24,9 @@ public class VehicleService {
 
     public void addVehicle(CreateVehicleDTO vehicleDTO, Long userId) {
 
+        Objects.requireNonNull(vehicleDTO, "vehicleDTO cannot be null");
+        Objects.requireNonNull(userId, "userId cannot be null");
+
         VehicleEntity vehicleEntity = new VehicleEntity();
         vehicleEntity.setMake(vehicleDTO.getMake());
         vehicleEntity.setModel(vehicleDTO.getModel());
@@ -35,6 +39,7 @@ public class VehicleService {
     }
 
     public List<VehicleDTO> getVehiclesByUser(Long userId) {
+        Objects.requireNonNull(userId, "userId cannot be null");
         log.debug("Fetching vehicles from repository for user {}", userId);
         List<VehicleEntity> vehicles = vehicleRepository.findByUserId(userId);
 
@@ -46,6 +51,8 @@ public class VehicleService {
     }
 
     public VehicleDTO getVehicleByUser(Long userId, Long vehicleId) {
+        Objects.requireNonNull(userId, "userId cannot be null");
+        Objects.requireNonNull(vehicleId, "vehicleId cannot be null");
         log.debug("Fetching vehicle for user ID: {} and vehicle ID: {}", userId, vehicleId);
         VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
 
@@ -58,6 +65,10 @@ public class VehicleService {
     }
 
     public VehicleDTO updateVehicleByUser(Long userId, Long vehicleId, UpdateVehicleDTO updateVehicleDTO) {
+        Objects.requireNonNull(userId, "userId cannot be null");
+        Objects.requireNonNull(vehicleId, "vehicleId cannot be null");
+        Objects.requireNonNull(updateVehicleDTO, "updateVehicleDTO cannot be null");
+
         VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
         if (vehicle == null) {
             throw new VehicleNotFoundException("Vehicle not found or access denied.");
@@ -81,6 +92,8 @@ public class VehicleService {
     }
 
     public void deleteVehicleByUser(Long userId, Long vehicleId) {
+        Objects.requireNonNull(userId, "userId cannot be null");
+        Objects.requireNonNull(vehicleId, "vehicleId cannot be null");
         VehicleEntity vehicle = vehicleRepository.findByIdAndUserId(vehicleId, userId);
         if (vehicle == null) {
             throw new VehicleNotFoundException("Vehicle not found or access denied.");
