@@ -3,18 +3,22 @@ package dev.forte.overlandplannerv2.weather;
 import com.openmeteo.sdk.*;
 import dev.forte.overlandplannerv2.waypoint.WaypointEntity;
 import dev.forte.overlandplannerv2.waypoint.WaypointRepository;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.LocalDate;
 
+@Slf4j
 @Service
+@Transactional
 public class WeatherService {
 
     private final OkHttpClient okHttpClient;
@@ -36,7 +40,37 @@ public class WeatherService {
         this.waypointRepository = waypointRepository;
     }
 
+    @Transactional
+    public void updateOrCreateWeather(Long waypointId, Double minTemp, Double maxTemp) {
+        WaypointEntity waypoint = waypointRepository.findById(waypointId)
+                .orElseThrow(() -> new RuntimeException("Waypoint not found"));
+
+        WeatherEntity weather = weatherRepository.findByWaypointId(waypointId);
+        if (weather != null) {
+            // Update existing weather
+            weather.setAvgMinTemperature(minTemp);
+            weather.setAvgMaxTemperature(maxTemp);
+            weatherRepository.save(weather);
+        } else {
+            // Create new weather
+            weather = new WeatherEntity();
+            weather.setWaypoint(waypoint);
+            weather.setAvgMinTemperature(minTemp);
+            weather.setAvgMaxTemperature(maxTemp);
+            waypoint.setWeather(weather);
+            waypointRepository.save(waypoint);
+        }
+    }
+
+
+
+
+
     public WeatherDTO getWeatherForWaypoint(Long userId, Long tripId, Long waypointId) {
+
+
+
+
         WaypointEntity waypoint = waypointRepository.findById(waypointId)
                 .orElseThrow(() -> new RuntimeException("Waypoint not found."));
 
@@ -98,25 +132,26 @@ public class WeatherService {
                 sumMax += tempMax.values(i);
                 sumMin += tempMin.values(i);
             }
-            double avgMax = sumMax / numDays;
-            double avgMin = sumMin / numDays;
 
-            // Create and persist the WeatherEntity.
-            WeatherEntity weatherEntity = new WeatherEntity();
-            weatherEntity.setWaypointId(waypoint.getId());
-            weatherEntity.setAvgMaxTemperature(avgMax);
-            weatherEntity.setAvgMinTemperature(avgMin);
-            weatherEntity.setTemperatureUnit(temperatureUnit);
+            double testmin = sumMin/numDays;
+            System.out.println(testmin);
 
-            weatherEntity = weatherRepository.save(weatherEntity);
+            double avgMax = Math.round(sumMax / numDays);
+            double avgMin = Math.round(sumMin / numDays);
 
-            // Map the saved entity to the DTO including IDs.
+            updateOrCreateWeather(waypointId, avgMin, avgMax);
+
+            WeatherEntity weatherEntity = weatherRepository.findByWaypointId(waypointId);
+
+
+
             return new WeatherDTO(
-                    weatherEntity.getId(),       // weatherId
-                    waypoint.getId(),            // waypointId
+                    weatherEntity.getId(),
+                    waypoint.getId(),
                     weatherEntity.getAvgMinTemperature(),
                     weatherEntity.getAvgMaxTemperature(),
                     weatherEntity.getTemperatureUnit()
+
             );
 
         } catch (IOException e) {

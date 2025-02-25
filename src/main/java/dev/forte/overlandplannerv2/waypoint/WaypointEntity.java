@@ -2,6 +2,7 @@ package dev.forte.overlandplannerv2.waypoint;
 
 
 import dev.forte.overlandplannerv2.trip.TripEntity;
+import dev.forte.overlandplannerv2.weather.WeatherEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -39,6 +40,11 @@ public class WaypointEntity {
 
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
+
+    @OneToOne(mappedBy = "waypoint", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private WeatherEntity weather;
+
+
 
 
     // Getters and setters
@@ -113,5 +119,13 @@ public class WaypointEntity {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public WeatherEntity getWeather() {
+        return weather;
+    }
+
+    public void setWeather(WeatherEntity weather) {
+        this.weather = weather;
     }
 }

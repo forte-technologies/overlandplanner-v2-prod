@@ -1,11 +1,11 @@
 package dev.forte.overlandplannerv2.waypoint.dtos;
 
 import dev.forte.overlandplannerv2.waypoint.WaypointEntity;
+import dev.forte.overlandplannerv2.weather.WeatherDTO;
 
 import java.time.LocalDate;
 
 public class WaypointDTO {
-
     private Long id;
     private Long tripId;
     private String name;
@@ -14,15 +14,29 @@ public class WaypointDTO {
     private Double longitude;
     private LocalDate startDate;
     private LocalDate endDate;
+    private WeatherDTO weather;
 
     public WaypointDTO(WaypointEntity entity) {
         this.id = entity.getId();
-        this.tripId = entity.getTrip() != null ? entity.getTrip().getId() : null; // Map trip ID safely
+        this.tripId = entity.getTrip() != null ? entity.getTrip().getId() : null;
         this.name = entity.getName();
         this.description = entity.getDescription();
         this.latitude = entity.getLatitude();
         this.longitude = entity.getLongitude();
+        this.startDate = entity.getStartDate();
+        this.endDate = entity.getEndDate();
+
+        if (entity.getWeather() != null) {
+            this.weather = new WeatherDTO(
+                    entity.getWeather().getId(),
+                    entity.getId(),
+                    entity.getWeather().getAvgMinTemperature(),
+                    entity.getWeather().getAvgMaxTemperature(),
+                    entity.getWeather().getTemperatureUnit()
+            );
+        }
     }
+
 
     public Long getId() {
         return id;
@@ -84,5 +98,11 @@ public class WaypointDTO {
         this.endDate = endDate;
     }
 
+    public WeatherDTO getWeather() {
+        return weather;
+    }
 
+    public void setWeather(WeatherDTO weather) {
+        this.weather = weather;
+    }
 }

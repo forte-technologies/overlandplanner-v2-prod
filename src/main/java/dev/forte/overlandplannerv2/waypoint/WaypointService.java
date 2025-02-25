@@ -22,7 +22,7 @@ public class WaypointService {
         this.tripRepository = tripRepository;
     }
 
-    public void addWaypoint(CreateWaypointDTO createWaypointDTO, Long userId, Long tripId) {
+    public WaypointDTO addWaypoint(CreateWaypointDTO createWaypointDTO, Long userId, Long tripId) {
         TripEntity tripEntity = tripRepository.findByIdAndUserId(tripId, userId);
         if (tripEntity == null) {
             throw new RuntimeException("Trip not found or access denied.");
@@ -39,6 +39,7 @@ public class WaypointService {
 
 
         waypointRepository.save(waypointEntity);
+        return new WaypointDTO(waypointEntity);
     }
 
     public List<WaypointDTO> getWaypoints(Long userId, Long tripId){
@@ -74,6 +75,9 @@ public class WaypointService {
     }
 
     public WaypointDTO updateWaypoint(Long userId, Long tripId, Long waypointId, UpdateWaypointDTO updateWaypointDTO){
+        log.debug("Updating waypoint: userId={}, tripId={}, waypointId={}, dto={}",
+                userId, tripId, waypointId, updateWaypointDTO);
+
         WaypointEntity waypointEntity = waypointRepository.findByIdAndTripId(waypointId,tripId);
         if (waypointEntity == null){
             throw new RuntimeException("Waypoint not found.");
@@ -104,4 +108,6 @@ public class WaypointService {
         waypointRepository.save(waypointEntity);
         return new WaypointDTO(waypointEntity);
     }
+
+
 }

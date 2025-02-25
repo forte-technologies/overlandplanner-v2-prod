@@ -1,19 +1,19 @@
 package dev.forte.overlandplannerv2.weather;
 
+import dev.forte.overlandplannerv2.waypoint.WaypointEntity;
 import jakarta.persistence.*;
 
 import java.util.Date;
-
 @Entity(name = "weather")
 public class WeatherEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "weather_id")
     private Long id;
 
-    @Column(name = "waypoint_id")
-    private Long waypointId;
+    @OneToOne
+    @JoinColumn(name = "waypoint_id", unique = true)
+    private WaypointEntity waypoint;
 
     @Column(name = "avg_min_temperature", nullable = true)
     private Double avgMinTemperature;
@@ -28,6 +28,7 @@ public class WeatherEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -36,13 +37,15 @@ public class WeatherEntity {
         this.id = id;
     }
 
-    public Long getWaypointId() {
-        return waypointId;
+    public WaypointEntity getWaypoint() {
+        return waypoint;
     }
 
-    public void setWaypointId(Long waypointId) {
-        this.waypointId = waypointId;
+    public void setWaypoint(WaypointEntity waypoint) {
+        this.waypoint = waypoint;
+
     }
+
 
     public Double getAvgMinTemperature() {
         return avgMinTemperature;
