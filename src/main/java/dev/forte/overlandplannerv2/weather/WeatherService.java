@@ -63,7 +63,6 @@ public class WeatherService {
     }
 
 
-
     public WeatherDTO getWeatherForWaypoint(Long userId, Long tripId, Long waypointId) {
 
         WaypointEntity waypoint = waypointRepository.findById(waypointId)
@@ -81,17 +80,10 @@ public class WeatherService {
         int wayPointYear = waypoint.getStartDate().getYear();
         int diffYear = wayPointYear - currentYear;
 
-        if (diffYear == 0){
-            LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1);
-            LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1);
-        } else {
-            LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1+diffYear);
-            LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1+diffYear);
-        }
 
+        LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1+diffYear);
+        LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1+diffYear);
 
-        LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1);
-        LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1);
 
         String url = String.format(
                 "%s?latitude=%s&longitude=%s&start_date=%s&end_date=%s" +
