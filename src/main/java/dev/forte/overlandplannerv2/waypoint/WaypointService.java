@@ -7,6 +7,7 @@ import dev.forte.overlandplannerv2.waypoint.dtos.UpdateWaypointDTO;
 import dev.forte.overlandplannerv2.waypoint.dtos.WaypointDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class WaypointService {
         return new WaypointDTO(waypointEntity);
     }
 
+    @Transactional
     public void deleteWaypoint(Long userId, Long tripId, Long waypointId){
         WaypointEntity waypointEntity = waypointRepository.findByIdAndTripId(waypointId,tripId);
         if (waypointEntity == null){

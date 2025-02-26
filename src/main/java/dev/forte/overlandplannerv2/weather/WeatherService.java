@@ -64,12 +64,7 @@ public class WeatherService {
 
 
 
-
-
     public WeatherDTO getWeatherForWaypoint(Long userId, Long tripId, Long waypointId) {
-
-
-
 
         WaypointEntity waypoint = waypointRepository.findById(waypointId)
                 .orElseThrow(() -> new RuntimeException("Waypoint not found."));
@@ -81,6 +76,19 @@ public class WeatherService {
         if (waypoint.getStartDate() == null || waypoint.getEndDate() == null) {
             throw new RuntimeException("Weather data requires a start and end date.");
         }
+
+        int currentYear = LocalDate.now().getYear();
+        int wayPointYear = waypoint.getStartDate().getYear();
+        int diffYear = wayPointYear - currentYear;
+
+        if (diffYear == 0){
+            LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1);
+            LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1);
+        } else {
+            LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1+diffYear);
+            LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1+diffYear);
+        }
+
 
         LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1);
         LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1);
