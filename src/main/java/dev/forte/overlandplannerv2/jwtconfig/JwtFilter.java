@@ -30,6 +30,15 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        // Skip token checking for endpoints that don't require authentication
+        String requestPath = request.getRequestURI();
+        if (requestPath.startsWith("/api/auth/password/") || 
+            requestPath.startsWith("/api/auth/") || 
+            requestPath.startsWith("/api/public/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

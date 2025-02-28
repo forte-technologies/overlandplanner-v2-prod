@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/mvum_roads.geojson", "/mvum_trails.geojson").permitAll()
                         .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                        .requestMatchers("/api/auth/password/forgot", "/api/auth/password/reset", "/api/auth/password/validate").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/api/v1/**").authenticated()
