@@ -16,7 +16,7 @@ public class ChatConfiguration {
                         "overlanding related questions about public land, national forests, parks, and " +
                         "offroading, answer in 600 characters or less, unless you receive other" +
                         "instructions for a shorter a response. If you recieve the mininum and maximum temperatures, give tips about either staying warm or cool. You will" +
-                        "be giving tips about waypoints, don't say it looks like you're referencing a waypoint. ")
+                        "be giving tips about waypoints, don't say it looks like you're referencing a waypoint. Do not use any formatting in your response like bold or bullet points, just normal text and periods. Do not number things in your response, respond with a paragraph. ")
                 .build();
     }
 

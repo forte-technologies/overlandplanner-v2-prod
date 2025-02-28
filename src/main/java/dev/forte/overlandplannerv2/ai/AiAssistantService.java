@@ -54,10 +54,14 @@ public class AiAssistantService {
             promptBuilder.append("Give a random tip about overlanding and remote camping in 250 characters or less.");
         }
 
-        return wayPointTipClient.prompt()
+        String response = wayPointTipClient.prompt()
                 .user(promptBuilder.toString())
                 .call()
                 .content();
+        System.out.println("Sending waypoint tip response: " + response); // Add logging
+        return response;
+
+
     }
 
     public String tripAssistant(String message){
@@ -83,7 +87,7 @@ public class AiAssistantService {
                 .append("Here is the users message: ")
                 .append(message);
 
-        return tripAssistantClient.prompt()
+        return vehicleAssistantClient.prompt()
                 .user(promptBuilder.toString())
                 .call()
                 .content();
