@@ -7,6 +7,8 @@ import dev.forte.overlandplannerv2.trip.dtos.SimpleTripDTO;
 import dev.forte.overlandplannerv2.trip.dtos.TripDTO;
 import dev.forte.overlandplannerv2.trip.dtos.UpdateTripDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +42,18 @@ public class TripService {
             log.info("Found {} trips for user: {}", trips.size(), userId);
         }
         return trips.stream().map(TripDTO::new).toList();
+    }
+    
+    public Page<TripDTO> getPaginatedTrips(Long userId, Pageable pageable) {
+        log.info("Fetching paginated trips for user: {}, page: {}, size: {}", 
+                userId, pageable.getPageNumber(), pageable.getPageSize());
+        
+        Page<TripEntity> tripPage = tripRepository.findByUserId(userId, pageable);
+        
+        log.info("Found {} trips for user: {} on page {}", 
+                tripPage.getNumberOfElements(), userId, pageable.getPageNumber());
+        
+        return tripPage.map(TripDTO::new);
     }
     
     public TripDTO getTripByUser(Long userId, Long tripId){
@@ -85,6 +99,27 @@ public class TripService {
     public List<SimpleTripDTO> getSimpleTripsByUser(Long userId) {
         return tripRepository.findSimpleTripsByUserId(userId);
     }
+
+    public TripDTO getLatestTrip(Long userId) {
+        TripEntity latestTrip = tripRepository.findLatestTripByUserId(userId);
+        if (latestTrip == null) {
+            throw new TripNotFoundException("No trips found for user.");
+        }
+        return new TripDTO(latestTrip);
+    }
+
+    public List<TripDTO> searchTripsByName(Long userId, String query, boolean exactMatch) {
+        if (exactMatch) {
+            TripEntity trip = tripRepository.findByUserIdAndName(userId, query);
+            return trip != null ? List.of(new TripDTO(trip)) : List.of();
+        } else {
+            List<TripEntity> trips = tripRepository.findByUserIdAndNameContainingIgnoreCase(userId, query);
+            return trips.stream()
+                    .map(TripDTO::new)
+                    .toList();
+        }
+    }
+
 
 
 }
