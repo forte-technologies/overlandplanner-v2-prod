@@ -24,9 +24,13 @@ public class WeatherService {
     private final OkHttpClient okHttpClient;
     private final WeatherRepository weatherRepository;
     private final WaypointRepository waypointRepository;
+    private final WeatherUpdateService weatherUpdateService;
 
-    @Value("${weather.api.baseurl}")
-    private String baseUrl;
+    @Value("${weather.api.historical.baseurl}")
+    private String baseUrlHist;
+
+    @Value("${weather.api.forecast.baseurl}")
+    private String baseUrlForecast;
 
     @Value("${weather.api.timezone}")
     private String timezone;
@@ -34,32 +38,11 @@ public class WeatherService {
     @Value("${weather.api.temperature_unit}")
     private String temperatureUnit;
 
-    public WeatherService(OkHttpClient okHttpClient, WeatherRepository weatherRepository, WaypointRepository waypointRepository) {
+    public WeatherService(OkHttpClient okHttpClient, WeatherRepository weatherRepository, WaypointRepository waypointRepository, WeatherUpdateService weatherUpdateService) {
         this.okHttpClient = okHttpClient;
         this.weatherRepository = weatherRepository;
         this.waypointRepository = waypointRepository;
-    }
-
-    @Transactional
-    public void updateOrCreateWeather(Long waypointId, Double minTemp, Double maxTemp) {
-        WaypointEntity waypoint = waypointRepository.findById(waypointId)
-                .orElseThrow(() -> new RuntimeException("Waypoint not found"));
-
-        WeatherEntity weather = weatherRepository.findByWaypointId(waypointId);
-        if (weather != null) {
-            // Update existing weather
-            weather.setAvgMinTemperature(minTemp);
-            weather.setAvgMaxTemperature(maxTemp);
-            weatherRepository.save(weather);
-        } else {
-            // Create new weather
-            weather = new WeatherEntity();
-            weather.setWaypoint(waypoint);
-            weather.setAvgMinTemperature(minTemp);
-            weather.setAvgMaxTemperature(maxTemp);
-            waypoint.setWeather(weather);
-            waypointRepository.save(waypoint);
-        }
+        this.weatherUpdateService = weatherUpdateService;
     }
 
 
@@ -77,25 +60,25 @@ public class WeatherService {
         }
 
         int currentYear = LocalDate.now().getYear();
-        int wayPointYear = waypoint.getStartDate().getYear();
-        int diffYear = wayPointYear - currentYear;
+        String url;
 
+            int wayPointYear = waypoint.getStartDate().getYear();
+            int diffYear = wayPointYear - currentYear;
 
-        LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1+diffYear);
-        LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1+diffYear);
+            LocalDate historicalStartDate = waypoint.getStartDate().minusYears(1+diffYear);
+            LocalDate historicalEndDate = waypoint.getEndDate().minusYears(1+diffYear);
 
-
-        String url = String.format(
-                "%s?latitude=%s&longitude=%s&start_date=%s&end_date=%s" +
-                        "&daily=temperature_2m_max&daily=temperature_2m_min&timezone=%s&temperature_unit=%s&format=flatbuffers",
-                baseUrl,
-                waypoint.getLatitude(),
-                waypoint.getLongitude(),
-                historicalStartDate,
-                historicalEndDate,
-                timezone,
-                temperatureUnit
-        );
+             url = String.format(
+                    "%s?latitude=%s&longitude=%s&start_date=%s&end_date=%s" +
+                            "&daily=temperature_2m_max&daily=temperature_2m_min&timezone=%s&temperature_unit=%s&format=flatbuffers",
+                    baseUrlHist,
+                    waypoint.getLatitude(),
+                    waypoint.getLongitude(),
+                    historicalStartDate,
+                    historicalEndDate,
+                    timezone,
+                    temperatureUnit
+            );
 
         try (Response response = okHttpClient.newCall(new Request.Builder().url(url).build()).execute()) {
             if (!response.isSuccessful()) {
@@ -133,17 +116,12 @@ public class WeatherService {
                 sumMin += tempMin.values(i);
             }
 
-            double testmin = sumMin/numDays;
-            System.out.println(testmin);
-
             double avgMax = Math.round(sumMax / numDays);
             double avgMin = Math.round(sumMin / numDays);
 
-            updateOrCreateWeather(waypointId, avgMin, avgMax);
+            weatherUpdateService.updateOrCreateWeather(waypointId, avgMin, avgMax);
 
             WeatherEntity weatherEntity = weatherRepository.findByWaypointId(waypointId);
-
-
 
             return new WeatherDTO(
                     weatherEntity.getId(),
