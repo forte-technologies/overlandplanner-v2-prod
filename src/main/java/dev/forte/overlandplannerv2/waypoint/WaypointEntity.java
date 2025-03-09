@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@Entity
+@Entity(name = "waypoints")
 @Table(name = "waypoints")
 public class WaypointEntity {
 

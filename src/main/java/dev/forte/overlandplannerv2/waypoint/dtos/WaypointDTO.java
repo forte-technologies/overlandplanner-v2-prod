@@ -17,6 +17,9 @@ public class WaypointDTO {
     private WeatherDTO weather;
 
     public WaypointDTO(WaypointEntity entity) {
+        if (entity == null) {
+            return; // Handle null entity gracefully
+        }
         this.id = entity.getId();
         this.tripId = entity.getTrip() != null ? entity.getTrip().getId() : null;
         this.name = entity.getName();
@@ -27,13 +30,18 @@ public class WaypointDTO {
         this.endDate = entity.getEndDate();
 
         if (entity.getWeather() != null) {
-            this.weather = new WeatherDTO(
+            try {
+                this.weather = new WeatherDTO(
                     entity.getWeather().getId(),
                     entity.getId(),
                     entity.getWeather().getAvgMinTemperature(),
                     entity.getWeather().getAvgMaxTemperature(),
                     entity.getWeather().getTemperatureUnit()
-            );
+                );
+            } catch (Exception e) {
+                // Log but don't throw the exception - just leave weather as null
+                System.out.println("Error mapping weather data: " + e.getMessage());
+            }
         }
     }
 

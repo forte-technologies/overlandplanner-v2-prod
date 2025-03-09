@@ -33,6 +33,5 @@ public interface TripRepository extends JpaRepository<TripEntity, Long> {
     @Query("SELECT t FROM trips t WHERE t.userId = :userId ORDER BY t.id DESC LIMIT 1")
     TripEntity findLatestTripByUserId(@Param("userId") Long userId);
 
-
 }
 

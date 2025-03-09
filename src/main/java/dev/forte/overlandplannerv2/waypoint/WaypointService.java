@@ -3,15 +3,19 @@ package dev.forte.overlandplannerv2.waypoint;
 import dev.forte.overlandplannerv2.trip.TripEntity;
 import dev.forte.overlandplannerv2.trip.TripRepository;
 import dev.forte.overlandplannerv2.waypoint.dtos.CreateWaypointDTO;
+import dev.forte.overlandplannerv2.waypoint.dtos.SimpleWaypointDTO;
 import dev.forte.overlandplannerv2.waypoint.dtos.UpdateWaypointDTO;
 import dev.forte.overlandplannerv2.waypoint.dtos.WaypointDTO;
 import dev.forte.overlandplannerv2.weather.WeatherDTO;
 import dev.forte.overlandplannerv2.weather.WeatherService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,6 +75,13 @@ public class WaypointService {
            log.info("Found {} waypoints for user: {}", waypointEntities.size(), userId);
         }
         return waypointEntities.stream().map(WaypointDTO::new).toList();
+    }
+
+    public Page<WaypointDTO> getPaginatedWaypoints(Long userId, Long tripId, Pageable pageable){
+
+        Page<WaypointEntity> waypointPage = waypointRepository.findByTripIdAndUserId(tripId, userId, pageable);
+
+        return waypointPage.map(WaypointDTO::new);
     }
 
     public WaypointDTO getWayPointByTripId(Long userId, Long tripId, Long waypointID){
@@ -152,5 +163,20 @@ public class WaypointService {
         return updatedWaypoint;
     }
 
+    public List<SimpleWaypointDTO> getSimpleWaypointsByTripId(Long userId, Long tripId){
+        return waypointRepository.findSimpleWaypointsByUserIdAndTripId(userId, tripId);
+    }
 
+    public List<WaypointDTO> searchWaypointsByName(Long userId, Long tripId, String query, boolean exactMatch) {
+            List<WaypointEntity> waypoints;
+            waypoints = waypointRepository.findByTripIdAndUserIdAndNameContainingIgnoreCase(tripId, userId, query);
+
+            return waypoints.stream()
+                    .map(waypoint -> {
+                        WaypointDTO dto = new WaypointDTO(waypoint);
+
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+    }
 }
