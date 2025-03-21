@@ -1,6 +1,5 @@
 package dev.forte.overlandplannerv2.ai;
 
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,11 +16,9 @@ import static dev.forte.overlandplannerv2.jwtconfig.AuthUtils.getAuthenticatedUs
 @RequestMapping("/api/user/ai")
 public class AiAssistantController {
 
-    private final ChatClient chatClient;
     private final AiAssistantService aiAssistantService;
 
-    public AiAssistantController(ChatClient.Builder chatClientBuilder, AiAssistantService aiAssistantService) {
-        this.chatClient = chatClientBuilder.build();
+    public AiAssistantController( AiAssistantService aiAssistantService) {
         this.aiAssistantService = aiAssistantService;
     }
 
@@ -44,9 +41,16 @@ public class AiAssistantController {
 
     @GetMapping("vehicle-assistant")
     public ResponseEntity<?> getVehicleAssistant(Authentication authentication, @RequestParam String userInput) {
-
         Long userId = getAuthenticatedUserId(authentication);
         var response = aiAssistantService.vehicleAssistant(userInput, userId);
+        Map<String, String> jsonResponse = new HashMap<>();
+        jsonResponse.put("message", response);
+        return ResponseEntity.ok(jsonResponse);
+    }
+
+    @GetMapping("/weather-assistant")
+    public ResponseEntity<?> getWeatherAssistant(@RequestParam String userInput) {
+        var response = aiAssistantService.weatherAssistant(userInput);
         Map<String, String> jsonResponse = new HashMap<>();
         jsonResponse.put("message", response);
         return ResponseEntity.ok(jsonResponse);

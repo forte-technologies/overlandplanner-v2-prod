@@ -3,14 +3,13 @@ package dev.forte.overlandplannerv2.ai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.forte.overlandplannerv2.trip.TripRepository;
 import dev.forte.overlandplannerv2.vehicle.dtos.VehicleDTO;
 import dev.forte.overlandplannerv2.vehicle.services.VehicleService;
-import dev.forte.overlandplannerv2.waypoint.WaypointRepository;
 import dev.forte.overlandplannerv2.weather.WeatherEntity;
 import dev.forte.overlandplannerv2.weather.WeatherRepository;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,26 +17,23 @@ import java.util.List;
 @Service
 public class AiAssistantService {
 
-    private final ChatClient wayPointTipClient;
-    private final ChatClient tripAssistantClient;
-    private final ChatClient vehicleAssistantClient;
     private final VehicleService vehicleService;
-    private final WaypointRepository waypointRepository;
     private final WeatherRepository weatherRepository;
     private final ObjectMapper objectMapper;
+    private final ChatClient chatClient;
+    private final ToolCallback weatherToolCallback;
+    private final ToolCallback geoToolCallback;
 
-
-    public AiAssistantService(@Qualifier("wayPointTips") ChatClient wayPointTipClient,
-                              @Qualifier("tripAssistant") ChatClient tripAssistantClient,
-                              @Qualifier("vehicleAssistant") ChatClient vehicleAssistantClient,
-                              VehicleService vehicleService, TripRepository tripRepository, WaypointRepository waypointRepository, WeatherRepository weatherRepository, ObjectMapper objectMapper) {
+    public AiAssistantService(
+            VehicleService vehicleService, WeatherRepository weatherRepository, ObjectMapper objectMapper,
+            OpenAiChatModel openAiChatModel, ToolCallback weatherToolCallback, ToolCallback geoToolCallback) {
         this.vehicleService = vehicleService;
-        this.waypointRepository = waypointRepository;
         this.weatherRepository = weatherRepository;
-        this.wayPointTipClient = wayPointTipClient;
-        this.tripAssistantClient = tripAssistantClient;
-        this.vehicleAssistantClient = vehicleAssistantClient;
         this.objectMapper = objectMapper;
+
+        this.chatClient = ChatClient.builder(openAiChatModel).build();
+        this.weatherToolCallback = weatherToolCallback;
+        this.geoToolCallback = geoToolCallback;
     }
 
     public String getWayPointTip(Long waypointId) {
@@ -54,18 +50,18 @@ public class AiAssistantService {
             promptBuilder.append("Give a random tip about overlanding and remote camping in 250 characters or less.");
         }
 
-        String response = wayPointTipClient.prompt()
-                .user(promptBuilder.toString())
-                .call()
-                .content();
-        System.out.println("Sending waypoint tip response: " + response); // Add logging
-        return response;
-
-
+       return chatClient
+               .prompt()
+               .system(AiPrompts.WAYPOINT_TIP)
+               .user(promptBuilder.toString())
+               .call()
+               .content();
     }
 
     public String tripAssistant(String message){
-        return tripAssistantClient.prompt()
+        return chatClient
+                .prompt()
+                .system(AiPrompts.TRIP_ASSISTANT)
                 .user(message)
                 .call()
                 .content();
@@ -87,8 +83,20 @@ public class AiAssistantService {
                 .append("Here is the users message: ")
                 .append(message);
 
-        return vehicleAssistantClient.prompt()
-                .user(promptBuilder.toString())
+         return chatClient
+                 .prompt()
+                 .system(AiPrompts.VEHICLE_ASSISTANT)
+                 .user(promptBuilder.toString())
+                 .call()
+                 .content();
+    }
+
+    public String weatherAssistant(String message){
+        return chatClient
+                .prompt()
+                .system("You are a weather assistant. Do not format your data with Bold text. Use dashes for bullet points as needed.")
+                .user(message)
+                .tools(weatherToolCallback,geoToolCallback)
                 .call()
                 .content();
     }
