@@ -3,6 +3,7 @@ package dev.forte.overlandplannerv2.trip.dtos;
 import dev.forte.overlandplannerv2.trip.TripEntity;
 import dev.forte.overlandplannerv2.waypoint.dtos.WaypointDTO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ public class TripDTO {
     private String description;
     private LocalDateTime createdAt;
     private List<WaypointDTO> waypointDTOS;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public TripDTO(TripEntity entity) {
         this.id = entity.getId();
@@ -23,6 +26,8 @@ public class TripDTO {
         this.name = entity.getName();
         this.description = entity.getDescription();
         this.createdAt = entity.getCreatedAt(); // Map LocalDateTime here
+        this.startDate = entity.getStartDate();
+        this.endDate = entity.getEndDate();
         this.waypointDTOS = entity.getWaypoints() != null
                 ? entity.getWaypoints().stream().map(WaypointDTO::new).collect(Collectors.toList())
                 : null;
@@ -86,4 +91,19 @@ public class TripDTO {
         this.waypointCount = waypointCount;
     }
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 }

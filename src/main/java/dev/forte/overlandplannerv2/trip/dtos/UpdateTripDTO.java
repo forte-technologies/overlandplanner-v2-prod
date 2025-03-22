@@ -1,9 +1,13 @@
 package dev.forte.overlandplannerv2.trip.dtos;
 
+import java.time.LocalDate;
+
 public class UpdateTripDTO {
 
     private String name;
     private String description;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public UpdateTripDTO() {}
 
@@ -21,5 +25,21 @@ public class UpdateTripDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 }
